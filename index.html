@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Order and Chaos</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="/lib/socket.io.min.js" charset="utf-8"></script>
+  <script src="/lib/cloak-client.min.js" charset="utf-8"></script>
+  <script src="/lib/underscore-min.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    function addTile(cell, type){
+      if (!cell.hasClass("marked")) {
+        cell.addClass("marked");
+        if(type == "o") {
+          cell.append('<img class="mark" src="/O.png">');
+        }
+        else {
+          cell.append('<img class="mark" src="/X.png">');
+        }
+      }
+    }
+    var userID = "original";
+    $(function() {
+      // Generate Table
+      var tablestr = "";
+      for(y = 0; y < 8; y++) {
+        tablestr += "<tr>";
+        for(x = 0; x < 8; x++) {
+          tablestr += "<td x='" + x + "' y='" + y + "'></td>";
+        }
+        tablestr += "</tr>";
+      }
+      $("#board").append(tablestr);
+
+      $("table.board td:not(.marked)").on({
+        mousedown: function(event){
+          var type = "x";
+          var cell = $(this);
+          if(event.which == 3){type = "o";}
+          addTile(cell, type);
+          cloak.message("putTile", cell.attr("x") + "," + cell.attr("y") + "," + type);
+        },
+        contextmenu: function() {
+          return false;
+        }
+      });
+      var url = window.location.pathname;
+      cloak.configure({
+        serverEvents: {
+          begin: function() {
+            if(url == "/") {
+              cloak.message("initRoom", "");
+              console.log("Sent");
+            }
+            else {
+              cloak.message("joinRoom", url.substring(3));
+            }
+          }
+        },
+        messages: {
+          setId: function(id) {
+            userID = id;
+            $("#showme").append("Your ID is: " + id);
+          },
+          completed: function(message) {
+            $("#showme").html("You are connected.");
+          },
+          tile: function(tiledata) {
+            var data = tiledata.split(",");
+            addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2]);
+          }
+        }
+      });
+      cloak.run("http://" + window.location.hostname + ":8090");
+    });
+  </script>
+  <link rel="stylesheet" href="/main.css" media="screen" title="no title" charset="utf-8">
+</head>
+
+<body>
+  <p id="showme"></p>
+  <table class="board noselect" id="board">
+
+  </table>
+</body>
+
+</html>
