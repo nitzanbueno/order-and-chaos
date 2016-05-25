@@ -1,9 +1,0 @@
-{
-  "name": "order-and-chaos",
-  "version": "0.0.1",
-  "description": "socket.io O&C server",
-  "dependencies": {
-    "cloak": "^1.0.0",
-    "express": "^4.13.4"
-  }
-}

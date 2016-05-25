@@ -54,9 +54,9 @@ app.get("/*", function (req, res) {
   res.sendFile(s);
 });
 
-app.listen(8081, function() {
+app.listen(80, function() {
   // Console will print the message
-  console.log('Server running at http://127.0.0.1:8081/');
+  console.log('Server running at http://127.0.0.1:80/');
 });
 
 
