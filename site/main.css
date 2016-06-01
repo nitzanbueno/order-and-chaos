@@ -1,0 +1,55 @@
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@-moz-keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+table.board {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+table.board td {
+    border: 3px solid black;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+img.mark {
+    width: 30px;
+    height: 30 animation: fadein 0.1s ease-in;
+    -webkit-animation: fadein 0.1s ease-in;
+    -moz-animation: fadein 0.1s ease-in;
+}
