@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>Order and Chaos</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script src="http://order-and-chaos.herokuapp.com/socket.io/socket.io.js"></script>
   <script src="/lib/cloak-client.min.js" charset="utf-8"></script>
   <script src="/lib/underscore-min.js" charset="utf-8"></script>
   <script type="text/javascript">
@@ -46,15 +46,19 @@
         }
       });
       var url = window.location.pathname;
+      console.log("Got to the URL path k?");
+      console.log(url);
       cloak.configure({
         serverEvents: {
           begin: function() {
+            console.log("BEGAN");
             if(url == "/") {
               cloak.message("initRoom", "");
               console.log("Sent");
             }
             else {
               cloak.message("joinRoom", url.substring(3));
+              console.log("Sent it yeh");
             }
           }
         },
