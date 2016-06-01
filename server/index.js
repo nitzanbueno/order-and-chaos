@@ -7,8 +7,22 @@ var cloak = require('cloak');
 
 var IDs = {};
 
+app.get("/*", function (req, res) {
+  // Send the HTTP header
+  // HTTP Status: 200 : OK
+  // Content Type: text/plain
+  // response.writeHead(200, {'Content-Type': 'text/plain'});
+  var s = dirpath + req.url;
+  res.sendFile(s);
+});
+
+var server = app.listen(process.env.PORT, function() {
+  // Console will print the message
+  console.log('Server running...');
+});
+
 cloak.configure({
-  port: process.env.PORT,
+  express: server,
   defaultRoomSize: 2,
   messages: {
     joinRoom: function(id, user) {
