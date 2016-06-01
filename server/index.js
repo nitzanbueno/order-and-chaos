@@ -8,7 +8,7 @@ var cloak = require('cloak');
 var IDs = {};
 
 cloak.configure({
-  port: 8090,
+  port: process.env.PORT,
   defaultRoomSize: 2,
   messages: {
     joinRoom: function(id, user) {
@@ -31,33 +31,5 @@ cloak.configure({
     }
   }
 });
-
-app.get("/", function (req, res) {
-  // Send the HTTP header
-  // HTTP Status: 200 : OK
-  // Content Type: text/plain
-  // response.writeHead(200, {'Content-Type': 'text/plain'});
-
-  res.sendFile(path.resolve(__dirname + '/../index.html'));
-});
-
-app.get("/p/*", function(req, res) {
-  res.sendFile(path.resolve(__dirname + '/../index.html'));
-});
-
-app.get("/*", function (req, res) {
-  // Send the HTTP header
-  // HTTP Status: 200 : OK
-  // Content Type: text/plain
-  // response.writeHead(200, {'Content-Type': 'text/plain'});
-  var s = dirpath + req.url;
-  res.sendFile(s);
-});
-
-app.listen(app.get('port'), function() {
-  // Console will print the message
-  console.log('Server running at http://127.0.0.1:80/');
-});
-
 
 cloak.run();
