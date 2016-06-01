@@ -72,7 +72,10 @@
           }
         }
       });
-      cloak.run("http://localhost:8090");
+      $.getJSON('config.json', function(config) {
+        cloak.run(config.cloakhost);
+      })
+
     });
   </script>
   <link rel="stylesheet" href="/main.css" media="screen" title="no title" charset="utf-8">
