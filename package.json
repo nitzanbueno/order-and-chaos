@@ -6,5 +6,5 @@
     "cloak": "^1.0.0",
     "express": "^4.13.4"
   },
-  "main": "index.js"
+  "main": "server/index.js"
 }
