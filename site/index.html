@@ -68,7 +68,8 @@
           cloak.end();
           running = false;
         }
-        $("#showme").html("You are playing locally.");
+        $("#showme").html("");
+        $("#friendlink").html("You are playing locally.");
         enablePlay = true;
         $("#localButton").hide();
       });
@@ -112,6 +113,7 @@
     });
   </script>
   <link rel="stylesheet" href="/main.css" media="screen" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 </head>
 
 <body>
