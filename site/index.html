@@ -9,14 +9,14 @@
   <script src="/lib/cloak-client.min.js" charset="utf-8"></script>
   <script src="/lib/underscore-min.js" charset="utf-8"></script>
   <script type="text/javascript">
-    function addTile(cell, type){
+    function addTile(cell, type, color){
       if (!cell.hasClass("marked")) {
         cell.addClass("marked");
         if(type == "o") {
-          cell.append('<img class="mark" src="/O.png">');
+          cell.append('<img class="mark" src="/O_' + color + '.png">');
         }
         else {
-          cell.append('<img class="mark" src="/X.png">');
+          cell.append('<img class="mark" src="/X_' + color + '.png">');
         }
       }
     }
@@ -38,7 +38,7 @@
           var type = "x";
           var cell = $(this);
           if(event.which == 3){type = "o";}
-          addTile(cell, type);
+          addTile(cell, type, "blue");
           cloak.message("putTile", cell.attr("x") + "," + cell.attr("y") + "," + type);
         },
         contextmenu: function() {
@@ -46,19 +46,15 @@
         }
       });
       var url = window.location.pathname;
-      console.log("Got to the URL path k?");
-      console.log(url);
       cloak.configure({
         serverEvents: {
           begin: function() {
             console.log("BEGAN");
             if(url == "/") {
               cloak.message("initRoom", "");
-              console.log("Sent");
             }
             else {
               cloak.message("joinRoom", url.substring(3));
-              console.log("Sent it yeh");
             }
           }
         },
@@ -72,7 +68,7 @@
           },
           tile: function(tiledata) {
             var data = tiledata.split(",");
-            addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2]);
+            addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2], "red");
           }
         }
       });
