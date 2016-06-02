@@ -9,16 +9,25 @@
   <script src="/lib/cloak-client.min.js" charset="utf-8"></script>
   <script src="/lib/underscore-min.js" charset="utf-8"></script>
   <script type="text/javascript">
+    var enablePlay = false;
+    var localPlay = false;
+    var turn = false;
+    var running = false;
     function addTile(cell, type, color){
-      if (!cell.hasClass("marked")) {
-        cell.addClass("marked");
-        if(type == "o") {
-          cell.append('<img class="mark" src="/O_' + color + '.png">');
-        }
-        else {
-          cell.append('<img class="mark" src="/X_' + color + '.png">');
+      if(enablePlay) {
+        if (!cell.hasClass("marked")) {
+          cell.addClass("marked");
+          if(type == "o") {
+            cell.append('<img class="mark" src="/O_' + color + '.png">');
+            return true;
+          }
+          else {
+            cell.append('<img class="mark" src="/X_' + color + '.png">');
+            return true;
+          }
         }
       }
+      return false;
     }
     var userID = "original";
     $(function() {
@@ -32,18 +41,36 @@
         tablestr += "</tr>";
       }
       $("#board").append(tablestr);
-
       $("table.board td:not(.marked)").on({
-        mousedown: function(event){
+        mousedown: function(event) {
           var type = "x";
           var cell = $(this);
           if(event.which == 3){type = "o";}
-          addTile(cell, type, "blue");
-          cloak.message("putTile", cell.attr("x") + "," + cell.attr("y") + "," + type);
+          var color = "blue"
+          if(localPlay) {
+            if(turn) {
+              color = "red";
+            }
+          }
+          if (addTile(cell, type, color)) {
+            console.log("Triggered");
+            turn = !turn;
+            cloak.message("putTile", cell.attr("x") + "," + cell.attr("y") + "," + type);
+          }
         },
         contextmenu: function() {
           return false;
         }
+      });
+      $("#localButton").click(function(){
+        localPlay = true;
+        if(running) {
+          cloak.end();
+          running = false;
+        }
+        $("#showme").html("You are playing locally.");
+        enablePlay = true;
+        $("#localButton").hide();
       });
       var url = window.location.pathname;
       cloak.configure({
@@ -61,10 +88,13 @@
         messages: {
           setId: function(id) {
             userID = id;
-            $("#showme").append("Your friend should go to this URL: <br><h1>" + window.location.protocol + "//" + window.location.hostname + "/p/" + id + "</h1>");
+            $("#friendlink").html(window.location.protocol + "//" + window.location.hostname + "/p/" + id);
           },
           completed: function(message) {
-            $("#showme").html("You are connected.");
+            $("#showme").html("");
+            enablePlay = true;
+            $("#localButton").hide();
+            $("#friendlink").html("You are connected.");
           },
           tile: function(tiledata) {
             var data = tiledata.split(",");
@@ -73,19 +103,30 @@
         }
       });
       $.getJSON('/config.json', function(config) {
-        cloak.run(config.cloakhost);
+        if(!localPlay) {
+          cloak.run(config.cloakhost);
+          running = true;
+        }
       })
 
     });
   </script>
-  <link rel="stylesheet" href="/main.css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/main.css" media="screen" />
 </head>
 
 <body>
-  <p id="showme"></p>
-  <table class="board noselect" id="board">
-
-  </table>
+  <div class="container">
+    <div class="layout">
+      <div class="board"><table class="board noselect" id="board"></table></div>
+      <div class="link">
+        <p id="showme">
+          Your friend should go to this URL:
+          <h2 id="friendlink">Loading...</h2>
+        </p>
+        <button id="localButton">Play Locally</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

@@ -25,6 +25,11 @@
     }
 }
 
+html, body {
+  background-color: #0CE883;
+  height: 100%;
+}
+
 table.board {
     table-layout: fixed;
     border-collapse: collapse;
@@ -41,15 +46,38 @@ table.board {
 
 table.board td {
     border: 3px solid black;
-    width: 50px;
-    height: 50px;
     text-align: center;
     vertical-align: middle;
+    height: 5vw;
+    width: 5vw;
 }
 
 img.mark {
-    width: 30px;
-    height: 30 animation: fadein 0.1s ease-in;
+    width: 4vw;
+    height: 4vw;
+    animation: fadein 0.1s ease-in;
     -webkit-animation: fadein 0.1s ease-in;
     -moz-animation: fadein 0.1s ease-in;
+    pointer-events: none;
+}
+
+div.container {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+div.layout {
+  display: table-row;
+}
+
+div.board {
+  display: table-cell;
+  padding-right: 50px;
+  width: 50%;
+}
+
+div.link {
+  display: table-cell;
+  width: 50%;
 }
