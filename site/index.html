@@ -65,7 +65,7 @@
         messages: {
           setId: function(id) {
             userID = id;
-            $("#showme").append("Your ID is: " + id);
+            $("#showme").append("Your friend should go to this URL: <br><h1>" + window.location.protocol + "//" + window.location.hostname + "/p/" + id + "</h1>");
           },
           completed: function(message) {
             $("#showme").html("You are connected.");
@@ -76,7 +76,7 @@
           }
         }
       });
-      $.getJSON('config.json', function(config) {
+      $.getJSON('/config.json', function(config) {
         cloak.run(config.cloakhost);
       })
 
