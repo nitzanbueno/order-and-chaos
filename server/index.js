@@ -34,7 +34,7 @@ cloak.configure({
     }
   },
   'socket.io': {
-    'origins': 'http://orderchaos.pe.hu/'
+    'origins': '*orderchaos.pe.hu*:*'
   }
 });
 
