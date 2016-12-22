@@ -34,7 +34,7 @@ cloak.configure({
     }
   },
   socketIo: {
-    origins: '*'
+    origins: '*:*'
   }
 });
 
