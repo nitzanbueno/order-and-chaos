@@ -33,8 +33,8 @@ cloak.configure({
       user.data.mate.message("clear", message);
     }
   },
-  'socketIo': {
-    'origins': '*orderchaos.pe.hu*:*'
+  socketIo: {
+    origins: '*'
   }
 });
 
