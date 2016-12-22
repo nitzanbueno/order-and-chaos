@@ -32,6 +32,9 @@ cloak.configure({
     clearBoard: function(message, user) {
       user.data.mate.message("clear", message);
     }
+  },
+  'socket.io': {
+    'origins': 'http://orderchaos.pe.hu/'
   }
 });
 
