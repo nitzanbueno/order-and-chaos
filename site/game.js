@@ -97,7 +97,13 @@ $(function () {
         $("#friendlink").html(window.location.protocol + "//" + window.location.hostname + "/p/" + id);
       },
       completed: function (message) {
-        $("#friendlink").html("You are connected.");
+        playerType = "neither type because there was something wrong lol";
+        if (message == "order") {
+          playerType = "Order";
+        } else if (message == "chaos") {
+          playerType = "Chaos";
+        }
+        $("#friendlink").html("You are connected.<br><small>You are playing as <strong>" + playerType + "</strong>.</small>");
         enabledPlay();
       },
       tile: function (tiledata) {

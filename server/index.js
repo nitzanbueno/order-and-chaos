@@ -33,7 +33,14 @@ cloak.configure({
       mate.data.mate = user;
       newRoom.addMember(user);
       newRoom.addMember(mate);
-      newRoom.messageMembers("completed", "");
+      var chaos = Math.random() >= 0.5;
+      if (chaos) {
+        user.message("completed", "chaos");
+        mate.message("completed", "order");
+      } else {
+        mate.message("completed", "chaos");
+        user.message("completed", "order");
+      }
     },
     initRoom: function (message, user) {
       var id = user.id.substring(0, 5);
