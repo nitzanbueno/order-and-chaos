@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="utf-8">
   <title>Order and Chaos</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-  <script src="http://order-and-chaos.herokuapp.com/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="/lib/socket.io.min.js"></script>
   <script src="/lib/cloak-client.min.js" charset="utf-8"></script>
   <script src="/lib/underscore-min.js" charset="utf-8"></script>
   <script type="text/javascript">
@@ -13,6 +11,14 @@
     var localPlay = false;
     var turn = false;
     var running = false;
+	var width = 6;
+	var height = 6;
+	function enabledPlay() {
+	    $("#showme").html("");
+        enablePlay = true;
+        $("#localButton").hide();
+		$("#clearButton").show();
+	}
     function addTile(cell, type, color){
       if(enablePlay) {
         if (!cell.hasClass("marked")) {
@@ -29,13 +35,16 @@
       }
       return false;
     }
+	function clearBoard() {
+		$("table.board td").html("");
+	}
     var userID = "original";
     $(function() {
       // Generate Table
       var tablestr = "";
-      for(y = 0; y < 8; y++) {
+      for(y = 0; y < height; y++) {
         tablestr += "<tr>";
-        for(x = 0; x < 8; x++) {
+        for(x = 0; x < width; x++) {
           tablestr += "<td x='" + x + "' y='" + y + "'></td>";
         }
         tablestr += "</tr>";
@@ -68,11 +77,13 @@
           cloak.end();
           running = false;
         }
-        $("#showme").html("");
         $("#friendlink").html("You are playing locally.");
-        enablePlay = true;
-        $("#localButton").hide();
+		enabledPlay();
       });
+	  $("#clearButton").click(function() {
+		clearBoard();
+		cloak.message("clearBoard", "");
+	  });
       var url = window.location.pathname;
       cloak.configure({
         serverEvents: {
@@ -92,14 +103,15 @@
             $("#friendlink").html(window.location.protocol + "//" + window.location.hostname + "/p/" + id);
           },
           completed: function(message) {
-            $("#showme").html("");
-            enablePlay = true;
-            $("#localButton").hide();
             $("#friendlink").html("You are connected.");
+			enabledPlay();
           },
           tile: function(tiledata) {
             var data = tiledata.split(",");
             addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2], "red");
+          },
+		  clear: function(message) {
+            clearBoard();
           }
         }
       });
@@ -112,8 +124,8 @@
 
     });
   </script>
-  <link rel="stylesheet" href="/main.css" media="screen" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="/main.css" media="screen">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
 
 <body>
@@ -123,12 +135,12 @@
       <div class="link">
         <p id="showme">
           Your friend should go to this URL:
-          <h2 id="friendlink">Loading...</h2>
-        </p>
+          </p><h2 id="friendlink">Loading...</h2>
+        <p></p>
         <button id="localButton">Play Locally</button>
+		<button id="clearButton" style="display: none;">Clear board</button>
       </div>
     </div>
   </div>
 </body>
-
 </html>
