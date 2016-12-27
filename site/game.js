@@ -4,6 +4,7 @@ var turn = false;
 var running = false;
 var width = 6;
 var height = 6;
+var amOrder = false;
 
 function enabledPlay() {
   $("#showme").html("");
@@ -26,6 +27,26 @@ function addTile(cell, type, color) {
     }
   }
   return false;
+}
+
+function getColor(me) {
+  // if me is true, get my color, else get my foe's color
+  if (localPlay) {
+    if (turn) {
+      return "red";
+    } else {
+      return "blue";
+    }
+  } else {
+    if (me == amOrder) {
+      // Order is blue and chaos is red
+      // So if I am order or if it's not my turn, return blue
+      return "blue";
+    } else {
+      // If I am chaos or it's not my turn, return red
+      return "red";
+    }
+  }
 }
 
 function clearBoard() {
@@ -51,12 +72,7 @@ $(function () {
       if (event.which == 3) {
         type = "o";
       }
-      var color = "blue"
-      if (localPlay) {
-        if (turn) {
-          color = "red";
-        }
-      }
+      var color = getColor(true);
       if (addTile(cell, type, color)) {
         turn = !turn;
         cloak.message("putTile", cell.attr("x") + "," + cell.attr("y") + "," + type);
@@ -100,15 +116,17 @@ $(function () {
         playerType = "neither type because there was something wrong lol";
         if (message == "order") {
           playerType = "Order";
+          amOrder = true;
         } else if (message == "chaos") {
           playerType = "Chaos";
+          amOrder = false;
         }
-        $("#friendlink").html("You are connected.<br><small>You are playing as <strong>" + playerType + "</strong>.</small>");
+        $("#friendlink").html("You are connected.<br><small>You are playing as <strong style=\"color: " + getColor(true) + "\">" + playerType + "</strong>.</small>");
         enabledPlay();
       },
       tile: function (tiledata) {
         var data = tiledata.split(",");
-        addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2], "red");
+        addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2], getColor(false));
       },
       clear: function (message) {
         clearBoard();
