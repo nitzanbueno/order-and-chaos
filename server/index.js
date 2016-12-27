@@ -46,9 +46,6 @@ cloak.configure({
     clearBoard: function(message, user) {
       user.data.mate.message("clear", message);
     }
-  },
-  socketIo: {
-    origins: '*:*'
   }
 });
 
