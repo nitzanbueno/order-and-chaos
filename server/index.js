@@ -16,7 +16,7 @@ app.get("/*", function (req, res) {
   res.sendFile(s);
 });
 
-var server = app.listen(process.env.PORT, function() {
+var server = app.listen(process.env.PORT, function () {
   // Console will print the message
   console.log('Server running...');
 });
@@ -25,7 +25,7 @@ cloak.configure({
   express: server,
   defaultRoomSize: 2,
   messages: {
-    joinRoom: function(id, user) {
+    joinRoom: function (id, user) {
       var mate = IDs[id];
       var newRoom = cloak.createRoom(id);
       delete IDs[id];
@@ -35,15 +35,15 @@ cloak.configure({
       newRoom.addMember(mate);
       newRoom.messageMembers("completed", "");
     },
-    initRoom: function(message, user) {
-      var id = user.id.substring(0,5);
+    initRoom: function (message, user) {
+      var id = user.id.substring(0, 5);
       IDs[id] = user;
       user.message("setId", id);
     },
-    putTile: function(message, user) {
+    putTile: function (message, user) {
       user.data.mate.message("tile", message);
     },
-    clearBoard: function(message, user) {
+    clearBoard: function (message, user) {
       user.data.mate.message("clear", message);
     }
   }
