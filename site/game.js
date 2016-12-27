@@ -84,10 +84,10 @@ $(function () {
     serverEvents: {
       begin: function () {
         console.log("BEGAN");
-        if (url == "/") {
-          cloak.message("initRoom", "");
-        } else {
+        if (url.startsWith("/p/")) {
           cloak.message("joinRoom", url.substring(3));
+        } else {
+          cloak.message("initRoom", "");
         }
       }
     },
