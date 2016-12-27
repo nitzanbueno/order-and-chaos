@@ -42,7 +42,13 @@ cloak.configure({
     },
     putTile: function(message, user) {
       user.data.mate.message("tile", message);
+    },
+    clearBoard: function(message, user) {
+      user.data.mate.message("clear", message);
     }
+  },
+  socketIo: {
+    origins: '*:*'
   }
 });
 
