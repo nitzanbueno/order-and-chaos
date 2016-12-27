@@ -58,7 +58,6 @@ $(function () {
         }
       }
       if (addTile(cell, type, color)) {
-        console.log("Triggered");
         turn = !turn;
         cloak.message("putTile", cell.attr("x") + "," + cell.attr("y") + "," + type);
       }
