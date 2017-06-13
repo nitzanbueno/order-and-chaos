@@ -1,18 +1,35 @@
 var enablePlay = false;
 var localPlay = false;
+// Local play: true=Chaos, false=Order
+// Web play: true = Your turn, false = Opponent's turn
 var turn = false;
 var running = false;
 var width = 6;
 var height = 6;
 var amOrder = false;
+var isAI = false;
 // Declare the board
 var board;
 
 function enabledPlay() {
   $("#showme").html("");
   enablePlay = true;
-  $("#localButton").hide();
+  $("#localPlay").hide();
   $("#clearButton").show();
+  console.log("ENABLE");
+}
+
+function xyToCell(x, y) {
+  return y * width + x;
+}
+
+function cellToXY(cell) {
+  return [cell % width, Math.floor(cell / width)];
+}
+
+function addTileById(id, type, color) {
+  cell = $('td[cellId="' + id + '"]');
+  return addTile(cell, type, color);
 }
 
 function addTile(cell, type, color) {
@@ -24,16 +41,9 @@ function addTile(cell, type, color) {
       } else {
         cell.append('<img class="mark" src="/X_' + color + '.png">');
       }
-      var x = parseInt(cell.attr("x"), 10);
-      var y = parseInt(cell.attr("y"), 10);
-      // mark shall be 'x' or 'o', lowercase if it's order, and uppercase if it's chaos
-      var mark;
-      if (color == "red") {
-        mark = type.toUpperCase();
-      } else {
-        mark = type.toLowerCase();
-      }
-      board[x][y] = mark;
+      var id = parseInt(cell.attr("cellId"), 10);
+      board[id].mark = type;
+      board[id].color = color;
       return true;
     }
   }
@@ -42,7 +52,7 @@ function addTile(cell, type, color) {
 
 function getColor(me) {
   // if me is true, get my color, else get my foe's color
-  if (localPlay) {
+  if (localPlay && !isAI) {
     if (turn) {
       return "red";
     } else {
@@ -63,29 +73,54 @@ function getColor(me) {
 function clearBoard() {
   $("table.board td").html("");
   $("table.board td").removeClass("marked");
-  board = new Array(width);
-  for (var i = 0; i < width; i++) {
-    board[i] = new Array(height);
+  board = new Array(width * height);
+  for (var x = 0; x < width; x++) {
+    for (var y = 0; y < height; y++) {
+      var id = xyToCell(x, y);
+      var cell = {
+        mark: undefined,
+        color: undefined,
+        id: id
+      }
+      board[id] = cell;
+    }
   }
+  initLines(board);
 }
 
 function canPlay() {
-  return turn || localPlay;
+  return turn || (localPlay && !isAI);
 }
 
+// newTurn is:
+// True for order, false for chaos in local play.
+// True for your turn, false for opponent's turn in net play or AI play.
 function updateTurn(newTurn) {
   turn = newTurn;
-  if (localPlay) {
+  var winString = getWinString(board);
+  if (winString != "") {
+    // We got a win
+    $("#turn").html("<strong>" + winString + "</strong>");
+    enablePlay = false;
+    return;
+  }
+  if (localPlay && !isAI) {
     if (turn) {
+      // Chaos
       $("#turn").html("It is now <strong style=\"color:" + getColor() + "\">Chaos's</strong> turn.");
     } else {
-      $("#turn").html("It is now <strong style=\"color:" + getColor() + "\">Order's</strong> turn.");
+      // Order
+			$("#turn").html("It is now <strong style=\"color:" + getColor() + "\">Order's</strong> turn.");
     }
-  } else {
+  }
+  else {
     if (turn) {
       $("#turn").html("It is now <strong>your</strong> turn.");
     } else {
       $("#turn").html("It is now <strong>your opponent's</strong> turn.");
+			if (isAI) {
+				setTimeout(doAI, 1000);
+			}
     }
   }
 }
@@ -102,21 +137,79 @@ function resetPage() {
 // Send every tile that's currently on my board to the opponent via addTile.
 // Useful when opponent is reconnecting
 function sendBoard() {
-  for (var x = 0; x < width; x++) {
-    for (var y = 0; y < height; y++) {
-      if (board[x][y]) {
-        var mark = board[x][y];
-        var type = mark.toLowerCase();
-        // mark == type means mark is lowercase, so it's order. Else it's chaos.
-        var color = mark == type ? "blue" : "red";
-        if (mark) {
-          var mess = x + "," + y + "," + type + "," + color;
-          console.log(mess);
-          cloak.message("sendTile", mess);
-        }
+  for (var i = 0; i < width * height; i++) {
+    if (board[i]) {
+      var type = board[i].mark;
+      var color = board[i].color;
+      if (type) {
+        var messij = i + "," + type + "," + color;
+        cloak.message("sendTile", messij);
       }
     }
   }
+}
+
+// Does the opponent's AI move.
+function doAI() {
+	if (amOrder) {
+		doChaosAI();
+	}
+	else {
+		doOrderAI();
+	}
+  updateTurn(true);
+}
+
+function doOrderAI() {
+  move = orderAI(board);
+  if(move) {
+    if(addTileById(move.cell, move.mark, "blue")) {
+      updateTurn(true);
+    }
+    else {
+      console.error("Cell taken or something");
+      console.error(JSON.stringify(move));
+    }
+  }
+}
+
+function doChaosAI() {
+  move = chaosAI(board);
+  if(move) {
+    if(addTileById(move.cell, move.mark, "red")) {
+      updateTurn(true);
+    }
+    else {
+      console.error("Cell taken or something");
+      console.error(JSON.stringify(move));
+    }
+  }
+}
+
+function playLocal() {
+	localPlay = true;
+	clearBoard();
+	if (running) {
+		cloak.end();
+		running = false;
+	}
+	$("#friendlink").html("You are playing locally.");
+	enabledPlay();
+	updateTurn(true);
+}
+
+function playAI() {
+  isAI = true;
+  amOrder = Math.random() > 0.5;
+  role = amOrder ? "Order" : "Chaos";
+	clearBoard();
+	if (running) {
+		cloak.end();
+		running = false;
+	}
+	$("#friendlink").html("You are playing as " + role + ".");
+	enabledPlay();
+	updateTurn(true);
 }
 
 var userID = "original";
@@ -126,7 +219,8 @@ $(function () {
   for (var y = 0; y < height; y++) {
     tablestr += "<tr>";
     for (var x = 0; x < width; x++) {
-      tablestr += "<td x='" + x + "' y='" + y + "'></td>";
+      var id = xyToCell(x, y);
+      tablestr += "<td cellId='" + id + "'></td>";
     }
     tablestr += "</tr>";
   }
@@ -137,34 +231,43 @@ $(function () {
         var type = "x";
         var cell = $(this);
         if (event.which == 3) {
+          console.log("RC");
           type = "o";
-        }
+				}
         var color = getColor(true);
         if (addTile(cell, type, color)) {
+          console.log("CLICK SUCCESS");
           updateTurn(!turn);
-          cloak.message("putTile", cell.attr("x") + "," + cell.attr("y") + "," + type);
+          cloak.message("putTile", cell.attr("cellId") + "," + type);
         }
+        else console.log("CLICK FAIL");
       }
     },
     contextmenu: function () {
+      console.log("CONTEXT");
+      if (canPlay()) {
+        var type = "o";
+        var cell = $(this);
+        var color = getColor(true);
+        if (addTile(cell, type, color)) {
+          console.log("CONTEXT SUCCESS");
+          updateTurn(!turn);
+          cloak.message("putTile", cell.attr("cellId") + "," + type);
+        }
+        else console.log("CONTEXT FAIL");
+      }
       return false;
     }
   });
   clearBoard();
-  $("#localButton").click(function () {
-    localPlay = true;
-    clearBoard();
-    if (running) {
-      cloak.end();
-      running = false;
-    }
-    $("#friendlink").html("You are playing locally.");
-    enabledPlay();
-  });
+  $("#localButton").click(playLocal);
   $("#clearButton").click(function () {
     clearBoard();
+    enablePlay = true;
+    updateTurn(turn);
     cloak.message("clearBoard", "");
   });
+  $("#aiButton").click(playAI);
   var url = window.location.pathname;
   cloak.configure({
     serverEvents: {
@@ -180,7 +283,9 @@ $(function () {
     messages: {
       setId: function (id) {
         userID = id;
-        $("#friendlink").html(window.location.protocol + "//" + window.location.hostname + "/p/" + id);
+        if(!enablePlay) {
+          $("#friendlink").html(window.location.protocol + "//" + window.location.hostname + "/p/" + id);
+        }
       },
       completed: function (message) {
         data = message.split(",");
@@ -197,22 +302,26 @@ $(function () {
         updateTurn(data[1] == "turn");
         $("#friendlink").html("You are connected.<br><small>You are playing as <strong style=\"color: " + getColor(true) + "\">" + role + "</strong>.</small>");
         sendBoard();
+		console.log("CONN");
         enabledPlay();
       },
       tile: function (tiledata) {
         // tile means the opponent has played a tile
-        updateTurn(true);
         var data = tiledata.split(",");
-        addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2], getColor(false));
+        addTileById(data[0], data[1], getColor(false));
+        updateTurn(true);
       },
       blindTile: function (tiledata) {
         // blindTile means opponent is sending a tile but not through playing.
         // When a board gets sent via reconnection this gets called
         var data = tiledata.split(",");
-        addTile($("td[x='" + data[0] + "'][y='" + data[1] + "']"), data[2], data[3]);
+        addTileById(data[0], data[1], data[2]);
+        updateTurn(turn);
       },
       clear: function (message) {
         clearBoard();
+        enablePlay = true;
+        updateTurn(turn);
       },
       disconnected: function (message) {
         $("#showme").html("You opponent has disconnected. <br>To reconnect, they should go to this URL:");
